@@ -36,9 +36,16 @@ def custom_score(game, player):
     float
         The heuristic value of the current game state to the specified player.
     """
+    if game.is_winner(player):
+        return float('inf')
+    if game.is_loser(player):
+        return float('-inf')
 
     # TODO: finish this function!
-    raise NotImplementedError
+    # -1 * opponent moves
+    # squares_remaining - my moves
+    # my moves - opponent moves
+    return game.get_legal_moves(player) - game.get_legal_moves(game.__inactive_player__)
 
 
 class CustomPlayer:
@@ -125,6 +132,7 @@ class CustomPlayer:
         # immediately if there are no legal moves
 
         try:
+            self.minimax(game, self.search_depth)
             # The search method call (alpha beta or minimax) should happen in
             # here in order to avoid timeout. The try/except block will
             # automatically catch the exception raised by the search method
