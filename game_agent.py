@@ -177,6 +177,11 @@ class CustomPlayer:
                 to pass the project unit tests; you cannot call any other
                 evaluation function directly.
         """
+        # For each legal move we can take:
+        # Evaluate the utility of the move with self.score for a forecast game with the move
+        # After looping, Return the score and best move
+
+        # After this works, use recursive calls to search successive layers as indicated by 'depth'
         if self.time_left() < self.TIMER_THRESHOLD:
             raise Timeout()
 
