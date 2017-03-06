@@ -45,7 +45,7 @@ def custom_score(game, player):
     # -1 * opponent moves
     # squares_remaining - my moves
     # my moves - opponent moves
-    return game.get_legal_moves(player) - game.get_legal_moves(game.__inactive_player__)
+    return len(game.get_legal_moves(player)) - len(game.get_legal_moves(game.__inactive_player__))
 
 
 class CustomPlayer:
@@ -178,6 +178,19 @@ class CustomPlayer:
                 evaluation function directly.
         """
         # For each legal move we can take:
+        actions = game.get_legal_moves(self)
+        max_score, min_score = float('-inf'), float('inf')
+        best = ''
+        for action in actions:
+            score = custom_score(game.forecast_move(action), self)
+            if maximizing_player:
+                if max_score < score:
+                    max_score = score
+                    best = action
+            else:
+                if min_score > score:
+                    min_score = score
+                    best = action
         # Evaluate the utility of the move with self.score for a forecast game with the move
         # After looping, Return the score and best move
 
@@ -186,7 +199,7 @@ class CustomPlayer:
             raise Timeout()
 
         # TODO: finish this function!
-        raise NotImplementedError
+        return best
 
     def alphabeta(self, game, depth, alpha=float("-inf"), beta=float("inf"), maximizing_player=True):
         """Implement minimax search with alpha-beta pruning as described in the
