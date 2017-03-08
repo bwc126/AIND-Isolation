@@ -195,41 +195,28 @@ class CustomPlayer:
         # After this works, use recursive calls to search successive layers as indicated by 'depth'
         if self.time_left() < self.TIMER_THRESHOLD:
             raise Timeout()
-        # For each legal move we can take:
-        actions = game.get_legal_moves(self)
+        # Of all the things, calling this with 'self' was cuasing an issue, because on the min steps, we want to minimize the heuristic score for our opponent. Calling .get_legal_moves() without an argument will automatically use whatever player should be active for that stage of the game, calling it without an argument will give us the correct moves at each alternating stage of prediction.
+        actions = game.get_legal_moves()
         if depth == 0:
-            return self.score(game, self), game.get_player_location(self)
+            return self.score(game, self), (-1, -1)
         if not actions:
             return self.score(game, self), (-1, -1)
+        best_action = (-1, -1)
+        if maximizing_player is True:
+            # print('maxing')
+            score = float('-inf')
+            min_or_max = max
 
-        if maximizing_player:
-            print('maxing')
-            best_score = float('-inf')
-            best_action = (-1,-1)
-            for action in actions:
-                forecast_game = game.forecast_move(action)
-                if self.iterative:
-                    score, fore_action = self.minimax(forecast_game, depth, False)
-                else:
-                    score, fore_action = self.minimax(forecast_game, depth-1, False)
-                if score > best_score:
-                    best_action = action
-                    best_score = score
-            return best_score, best_action
         else: # Minimizing player
-            print('minning')
-            best_score = float('inf')
-            best_action = (-1,-1)
-            for action in actions:
-                forecast_game = game.forecast_move(action)
-                if self.iterative:
-                    score, fore_action = self.minimax(forecast_game, depth, True)
-                else:
-                    score, fore_action = self.minimax(forecast_game, depth-1, True)
-                if score < best_score:
-                    best_action = action
-                    best_score = score
-            return best_score, best_action
+            # print('minning')
+            score = float('inf')
+            min_or_max = min
+
+        for action in actions:
+            current_score, _ = self.minimax(game.forecast_move(action), depth - 1, not maximizing_player)
+            score, best_action = min_or_max((score, best_action), (current_score, action))
+        return score, best_action
+
 
     def alphabeta(self, game, depth, alpha=float("-inf"), beta=float("inf"), maximizing_player=True):
         """Implement minimax search with alpha-beta pruning as described in the
@@ -271,37 +258,31 @@ class CustomPlayer:
         """
         if self.time_left() < self.TIMER_THRESHOLD:
             raise Timeout()
-        actions = game.get_legal_moves(self)
+        actions = game.get_legal_moves()
         if depth == 0:
-            return self.score(game, self), game.get_player_location(self)
+            return self.score(game, self), (-1, -1)
         if not actions:
             return self.score(game, self), (-1, -1)
+        best_action = (-1, -1)
+        if maximizing_player is True:
+            # print('maxing')
+            score = float('-inf')
+            min_or_max = max
 
-        if maximizing_player:
-            best_score = float('-inf')
-            best_action = (-1,-1)
-            for action in actions:
-                forecast_game = game.forecast_move(action)
-                if self.iterative:
-                    score, fore_action = self.alphabeta(forecast_game, depth, alpha, beta, maximizing_player = False)
-                else:
-                    score, fore_action = self.alphabeta(forecast_game, depth-1, alpha, beta, maximizing_player = False)
-                if score >= beta:
-                    best_action = action
-                    best_score = score
-                alpha = max(alpha, score)
-            return best_score, best_action
         else: # Minimizing player
-            best_score = float('inf')
-            best_action = (-1,-1)
-            for action in actions:
-                forecast_game = game.forecast_move(action)
-                if self.iterative:
-                    score, fore_action = self.alphabeta(forecast_game, depth, alpha, beta, maximizing_player = True)
-                else:
-                    score, fore_action = self.alphabeta(forecast_game, depth-1, alpha, beta, maximizing_player = True)
-                if score <= alpha:
-                    best_action = action
-                    best_score = score
+            # print('minning')
+            score = float('inf')
+            min_or_max = min
+
+        for action in actions:
+            current_score, _ = self.alphabeta(game.forecast_move(action), depth - 1, alpha, beta, not maximizing_player)
+            score, best_action = min_or_max((score, best_action), (current_score, action))
+            if maximizing_player:
+                alpha = max(alpha, score)
+                if score >= beta:
+                    return score, best_action
+            else:
                 beta = min(beta, score)
-            return best_score, best_action
+                if score <= alpha:
+                    return score, best_action
+        return score, best_action
