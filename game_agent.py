@@ -13,6 +13,51 @@ class Timeout(Exception):
     """Subclass base exception for code clarity."""
     pass
 
+def my_moves(game, player):
+    """The basic my_moves heuristic discussed in the lectures.
+
+    Note: this function should be called from within the custom_score function
+     -- you should not need to call this function directly.
+
+    Parameters
+    ----------
+    game : `isolation.Board`
+        An instance of `isolation.Board` encoding the current state of the
+        game (e.g., player locations and blocked cells).
+
+    player : object
+        A player instance in the current game (i.e., an object corresponding to
+        one of the player objects `game.__player_1__` or `game.__player_2__`.)
+
+    Returns
+    -------
+    float
+        The heuristic value of the current game state to the specified player.
+    """
+    return float(len(game.get_legal_moves(player)))
+
+def moves_difference(game, player):
+    """The basic my_moves heuristic discussed in the lectures.
+
+    Note: this function should be called from within the custom_score function
+     -- you should not need to call this function directly.
+
+    Parameters
+    ----------
+    game : `isolation.Board`
+        An instance of `isolation.Board` encoding the current state of the
+        game (e.g., player locations and blocked cells).
+
+    player : object
+        A player instance in the current game (i.e., an object corresponding to
+        one of the player objects `game.__player_1__` or `game.__player_2__`.)
+
+    Returns
+    -------
+    float
+        The heuristic value of the current game state to the specified player.
+    """
+    return float(len(game.get_legal_moves(player)) - len(game.get_legal_moves(game.__inactive_player__)))
 
 def custom_score(game, player):
     """Calculate the heuristic value of a game state from the point of view
@@ -45,7 +90,8 @@ def custom_score(game, player):
     # -1 * opponent moves
     # squares_remaining - my moves
     # my moves - opponent moves
-    return float(len(game.get_legal_moves(player)) - len(game.get_legal_moves(game.__inactive_player__)))
+    # return my_moves(game, player)
+    return moves_difference(game, player)
 
 
 class CustomPlayer:
@@ -79,7 +125,7 @@ class CustomPlayer:
     """
 
     def __init__(self, search_depth=3, score_fn=custom_score,
-                 iterative=True, method='minimax', timeout=10.):
+                 iterative=True, method='alphabeta', timeout=10.):
         self.search_depth = search_depth
         self.iterative = iterative
         self.score = score_fn
