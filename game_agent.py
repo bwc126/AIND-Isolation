@@ -37,7 +37,7 @@ def my_moves(game, player):
     return float(len(game.get_legal_moves(player)))
 
 def moves_difference(game, player):
-    """The basic my_moves heuristic discussed in the lectures.
+    """The improved my_moves-opponent_moves heuristic discussed in the lectures.
 
     Note: this function should be called from within the custom_score function
      -- you should not need to call this function directly.
@@ -58,6 +58,29 @@ def moves_difference(game, player):
         The heuristic value of the current game state to the specified player.
     """
     return float(len(game.get_legal_moves(player)) - len(game.get_legal_moves(game.__inactive_player__)))
+
+def board_margin(game, player):
+    """A heuristic based on the difference between my moves and opponeent moves, scaled by the number of empty spaces on the board
+
+    Note: this function should be called from within the custom_score function
+     -- you should not need to call this function directly.
+
+    Parameters
+    ----------
+    game : `isolation.Board`
+        An instance of `isolation.Board` encoding the current state of the
+        game (e.g., player locations and blocked cells).
+
+    player : object
+        A player instance in the current game (i.e., an object corresponding to
+        one of the player objects `game.__player_1__` or `game.__player_2__`.)
+
+    Returns
+    -------
+    float
+        The heuristic value of the current game state to the specified player.
+    """
+    return float(len(game.get_blank_spaces())*(len(game.get_legal_moves(player)) - len(game.get_legal_moves(game.__inactive_player__))))
 
 def custom_score(game, player):
     """Calculate the heuristic value of a game state from the point of view
@@ -87,10 +110,7 @@ def custom_score(game, player):
         return float('-inf')
 
     # TODO: finish this function!
-    # -1 * opponent moves
-    # squares_remaining - my moves
-    # my moves - opponent moves
-    # return my_moves(game, player)
+
     return moves_difference(game, player)
 
 
@@ -187,7 +207,7 @@ class CustomPlayer:
             # automatically catch the exception raised by the search method
             # when the timer gets close to expiring
             if self.iterative:
-                self.search_depth = 0
+                self.search_depth = 1
                 while self.iterative:
                     if self.method == 'minimax':
                         best_score, best_a = self.minimax(game, self.search_depth)
